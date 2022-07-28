@@ -1,0 +1,9 @@
+/__pychache__/*
+/checkpoint/*
+/results/*
+
+/models/__pychache__/*
+# /models/kws_bnn_binary2.py
+/models/cnnVAD.py
+
+/input/*
