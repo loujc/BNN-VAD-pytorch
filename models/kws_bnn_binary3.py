@@ -1,36 +1,23 @@
 import torch.nn as nn
+import torch
 import torchvision.transforms as transforms
-# from .binarized_modules import  BinarizeLinear,BinarizeConv2d
-from binarized_modules import  BinarizeLinear,BinarizeConv2d
-__all__ = ['kws_bnn_binary']
+from .binarized_modules import  BinarizeLinear,BinarizeConv2d
+# from binarized_modules import  BinarizeLinear,BinarizeConv2d
+__all__ = ['kws_bnn_binary3']
 
-class kws_bnn(nn.Module):
 
-    def __init__(self, num_classes=10):
-        super(kws_bnn, self).__init__()
-        self.ratioInfl=1
+class kws_bnn3(nn.Module):
+
+    def __init__(self, num_classes=2):
+        super(kws_bnn3, self).__init__()
+        self.ratioInfl=3
         self.features = nn.Sequential(
             # 1
-            # BinarizeConv2d(3, int(64*self.ratioInfl), kernel_size=11, stride=4, padding=2),
-            BinarizeConv2d(1, int(5*self.ratioInfl), kernel_size=(6,6), stride=(6,6), padding=(2,2)),
-            # nn.MaxPool2d(kernel_size=3, stride=2),
-            nn.BatchNorm2d(int(5*self.ratioInfl)),
+            BinarizeConv2d(1, int(1*self.ratioInfl), kernel_size=(5,1), stride=(3,1), padding=(0,0),bias=False),
             nn.Hardtanh(inplace=True),
         )
         self.classifier = nn.Sequential(
-            # BinarizeLinear(256 * 6 * 6, 4096),
-            # nn.BatchNorm1d(4096),
-            # nn.Hardtanh(inplace=True),
-            # #nn.Dropout(0.5),
-            # BinarizeLinear(4096, 4096),
-            # nn.BatchNorm1d(4096),
-            # nn.Hardtanh(inplace=True),
-            # #nn.Dropout(0.5),
-            # BinarizeLinear(4096, num_classes),
-            # nn.BatchNorm1d(1000),
-            # nn.LogSoftmax()
-            BinarizeLinear(int(5*self.ratioInfl)*5*5, num_classes),
-            nn.BatchNorm1d(num_classes),
+            BinarizeLinear(int(1*self.ratioInfl)*6*6, num_classes),
             nn.LogSoftmax()
         )
 
@@ -50,7 +37,8 @@ class kws_bnn(nn.Module):
             40: {'lr': 1e-5}
         }
         # 改为了 MNIST 的 std 和 mean
-        normalize = transforms.Normalize((0.1307,), (0.3081,))
+        # normalize = transforms.Normalize((0.1307,), (0.3081,))
+        normalize = None
         # 改为了 MNIST transform 处理方式
         self.input_transform = {
             'train': transforms.Compose([
@@ -72,29 +60,29 @@ class kws_bnn(nn.Module):
         x = self.features(x)
         # print(x.size())
         # x = x.view(-1, 256 * 6 * 6) # 256 * 6 * 6 = 9216
-        x = x.view(-1, 5 * 5 * 5) # 256 * 6 * 6 = 9216
+        x = x.view(-1, 3 * 6 * 6) # 256 * 6 * 6 = 9216
         x = self.classifier(x)
         return x
 
 
-def kws_bnn_binary(**kwargs):
-    num_classes = kwargs.get( 'num_classes', 10)
-    return kws_bnn(num_classes)
+def kws_bnn_binary3(**kwargs):
+    num_classes = kwargs.get( 'num_classes', 2)
+    return kws_bnn3(num_classes)
 
 if __name__ == '__main__':
     from torchsummary import summary
     from torchstat import stat
     import torch
     # device = torch.device("cuda")
-    model = kws_bnn()
+    model = kws_bnn3()
     # .to(device)
-    input=torch.Tensor(3,224,224)
+    input=torch.Tensor(1,20,6)
     # summary(model,(224,224))
     # input = torch.Tensor(3,224,224)
     # input.cuda()
     # print(len(input))
     # print(type(input))
     # input.to(device)
-    stat(model,(1,28,28))
+    stat(model,(1,20,6))
     # total = sum([param.nelement() for param in model.parameters()])
     # print("Number of parameters: %.2fM" % (total/1e6))

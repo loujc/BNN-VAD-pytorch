@@ -125,9 +125,8 @@ def main():
 
     logging.info("saving to %s", save_path)
     logging.debug("run arguments: %s", args)
-    
-    print('CUDA_STATUS:',torch.cuda.is_available())                 # 打印 cuda 状态
     os.environ['CUDA_VISIBLE_DEVICE'] = '0,1,2,3'
+    print('CUDA_STATUS:',torch.cuda.is_available())                 # 打印 cuda 状态
     if 'cuda' in args.type:                                         # gpu 调用
         args.gpus = [int(i) for i in args.gpus.split(',')]
         # torch.cuda.set_device(args.gpus[0])

@@ -5,5 +5,5 @@
 /models/__pychache__/*
 # /models/kws_bnn_binary2.py
 /models/cnnVAD.py
-
+/main_binary_cpu.py
 /input/*

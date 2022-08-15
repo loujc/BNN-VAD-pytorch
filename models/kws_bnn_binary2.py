@@ -1,8 +1,25 @@
 import torch.nn as nn
+import torch
 import torchvision.transforms as transforms
-# from .binarized_modules import  BinarizeLinear,BinarizeConv2d
-from binarized_modules import  BinarizeLinear,BinarizeConv2d
+from .binarized_modules import  BinarizeLinear,BinarizeConv2d
+# from binarized_modules import  BinarizeLinear,BinarizeConv2d
 __all__ = ['kws_bnn_binary2']
+
+# onnx 对 BN1d 不支持，所以需要自定义BN1d
+# 仅仅在转 onnx 时候使用
+# class MyBatchNorm1d(nn.BatchNorm1d):
+#     def __init__(self, num_features):
+#         super(MyBatchNorm1d, self).__init__(num_features)
+#         self.eps = 1e-5
+#         self.affine = True
+
+#     def forward(self, input):
+#         self._check_input_dim(input)
+#         # calculate running estimates
+#         input = (input - self.running_mean) / (torch.sqrt(self.running_var + self.eps))
+#         if self.affine:
+#             input = input * self.weight + self.bias
+#         return input
 
 class kws_bnn2(nn.Module):
 
@@ -28,11 +45,14 @@ class kws_bnn2(nn.Module):
             # nn.BatchNorm1d(4096),
             # nn.Hardtanh(inplace=True),
             # #nn.Dropout(0.5),
+
+
             # BinarizeLinear(4096, num_classes),
             # nn.BatchNorm1d(1000),
             # nn.LogSoftmax()
             BinarizeLinear(int(1*self.ratioInfl)*6*6, num_classes),
             nn.BatchNorm1d(num_classes),
+            # MyBatchNorm1d(num_classes),
             nn.LogSoftmax()
         )
 
@@ -98,6 +118,6 @@ if __name__ == '__main__':
     # print(len(input))
     # print(type(input))
     # input.to(device)
-    stat(model,input)
+    stat(model,(1,20,6))
     # total = sum([param.nelement() for param in model.parameters()])
     # print("Number of parameters: %.2fM" % (total/1e6))
